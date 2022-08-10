@@ -27,20 +27,19 @@ class ConvertToWRS(contextlib.ExitStack):
         >>> conv.get_wrs(50.14, -1.43)
         [{'path': 201, 'row': 25}, {'path': 202, 'row': 25}]
     """
-    def __enter__(self, shapefile="../aux/WRS2_descending/WRS2_descending.shp"):
+    def __init__(self, shapefile="../aux/WRS2_descending/WRS2_descending.shp"):
         """Create a new instance of the ConvertToWRS class,
         and load the shapefiles into memory.
         If it can't find the shapefile then specify the path
         using the shapefile keyword - but it should work if the
         shapefile is in the same directory.
         """
-        # super().__init__()
-        # self.shapefile = self.enter_context(ogr.Open(shapefile))
+        # self.shapefile = ogr.Open(shapefile)
         # self.layer = self.shapefile.GetLayer(0)
-        self.shapefile = ogr.Open(shapefile)
-        self.layer = self.shapefile.GetLayer(0)
 
+        file = ogr.Open(shapefile)
         self.polygons = []
+        self.layer = file.GetLayer(0)
 
         # For each feature in the layer
         for i in range(self.layer.GetFeatureCount()):
@@ -58,6 +57,8 @@ class ConvertToWRS(contextlib.ExitStack):
             # Store the shape and the path/row values
             # in a list so we can search it easily later
             self.polygons.append((shape, path, row))
+
+        file = None
 
 
     def get_wrs(self, lat, lon):
@@ -102,7 +103,3 @@ class ConvertToWRS(contextlib.ExitStack):
 
         # Return the results list to the user
         return res
-
-
-    def __exit__(self):
-        self.shapefile.close()
